@@ -24,7 +24,7 @@ public:
 	// Sets default values for this component's properties
 	UCharacterStatsComponent();
 
-	bool TakeDamage(FSDamageInfo DamageInfo, AActor* Instigator);
+	bool TakeDamage(FSDamageInfo DamageInfo, AActor* Causer);
 	
 	UPROPERTY(BlueprintAssignable, Category="Events")
 

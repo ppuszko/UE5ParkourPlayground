@@ -3,9 +3,8 @@
 
 #include "Characters/CharacterBase.h"
 #include "Weapons/WeaponBase.h"
+#include "ActorComponents/AttackComponent.h"
 #include "Engine/World.h"
-
-#include "ActorComponents/CharacterStatsComponent.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -15,6 +14,16 @@ ACharacterBase::ACharacterBase()
 
 	Stats = CreateDefaultSubobject<UCharacterStatsComponent>(TEXT("StatsComponent"));
 
+	AttackComponent = CreateDefaultSubobject<UAttackComponent>(TEXT("AttackComponent"));
+}
+
+
+bool ACharacterBase::TakeDamage(AActor* Causer)
+{
+	ACharacterBase* DamageCauser = Cast<ACharacterBase>(Causer);
+	auto DamageInfo = Weapon->ConstructDamageInfo(AttackComponent->GetCurrentAttacIndex());
+
+	return Stats->TakeDamage(DamageInfo, Causer);
 }
 
 // Called when the game starts or when spawned

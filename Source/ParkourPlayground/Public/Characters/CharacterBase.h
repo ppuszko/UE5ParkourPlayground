@@ -4,14 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ActorComponents/CharacterStatsComponent.h"
+#include "GameplayTagContainer.h"
+#include "GameplayTagAssetInterface.h"
+#include "Interfaces/Damageable.h"
 
 #include "CharacterBase.generated.h"
 
-class UCharacterStatsComponent;
+class UAttackComponent;
 class AWeaponBase;
 
+
 UCLASS()
-class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter
+class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IGameplayTagAssetInterface, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -22,12 +27,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	AWeaponBase* GetWeapon() const { return Weapon; }
 
+	UFUNCTION(BlueprintCallable, Category="Components")
+	virtual bool TakeDamage(AActor* Causer) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	UCharacterStatsComponent* Stats;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UAttackComponent* AttackComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
 	AWeaponBase* Weapon;
@@ -38,6 +49,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	FName WeaponSocketName;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Team")
+	FGameplayTagContainer TeamTags;
+
+public:
+
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
+
+	
 
 public:	
 	// Called every frame

@@ -4,6 +4,10 @@
 #include "Weapons/WeaponBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Characters/CharacterBase.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "GameplayTagAssetInterface.h"
+#include "Interfaces/Damageable.h"
 
 void AWeaponBase::ToggleActive()
 {
@@ -48,17 +52,56 @@ void AWeaponBase::BeginPlay()
 
 void AWeaponBase::HandleOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AActor* WeaponOwner = Cast<AActor>(OverlappedComp->GetOwner()->GetOwner());
+	AActor* WeaponOwner = Cast<ACharacterBase>(OverlappedComp->GetOwner()->GetOwner());
+
 	if (WeaponOwner && WeaponOwner != OtherActor)
 	{
 		if (HitActors.Contains(OtherActor)) { return; }
 		else
 		{
-			HitActors.Add(OtherActor);
+			if (CanBeAttacked(OtherActor, WeaponOwner))
+			{
+				HitActors.Add(OtherActor);
+				if (IDamageable* ActorToHit = Cast<IDamageable>(OtherActor))
+				{
 
-			//TODO: implement receiving damage when IDamageable is implemented
+					ActorToHit->TakeDamage(WeaponOwner);
+				}
+
+			}
+			
+
 		}
 	}
+}
+
+FSDamageInfo AWeaponBase::ConstructDamageInfo(int Index)
+{
+	const UAttackDataAsset* AttackData = GetAttackDataByIndex(Index);
+	checkf(AttackData, TEXT("Attack Data is null"));
+
+	FSDamageInfo DamageInfo{WeaponDataAsset->BaseDamage, AttackData->DamageResponse, WeaponDataAsset->DamageType,
+							AttackData->CanDamageInvincible, AttackData->CanBeBlocked, AttackData->CanForceInterrupt};
+
+	return DamageInfo;
+}
+
+bool AWeaponBase::CanBeAttacked(AActor* TargetActor, AActor* OwningActor)
+{
+	IGameplayTagAssetInterface* Target = Cast<IGameplayTagAssetInterface>(TargetActor);
+	IGameplayTagAssetInterface* Causer = Cast<IGameplayTagAssetInterface>(OwningActor);
+
+	if (Target && Owner)
+	{
+		FGameplayTagContainer TargetTags;
+		Target->GetOwnedGameplayTags(TargetTags);
+
+		FGameplayTagContainer CauserTags;
+		Causer->GetOwnedGameplayTags(CauserTags);
+
+		return !CauserTags.HasAny(TargetTags);
+	}
+	return false;
 }
 
 

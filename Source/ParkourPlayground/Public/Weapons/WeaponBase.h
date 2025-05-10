@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Weapons/Data/WeaponDataAsset.h"
+
 #include "WeaponBase.generated.h"
 
 class UStaticMeshComponent;
 class UCapsuleComponent;
+class ACharacterBase;
 
 UCLASS(Abstract, Blueprintable)
 class PARKOURPLAYGROUND_API AWeaponBase : public AActor
@@ -17,6 +20,15 @@ class PARKOURPLAYGROUND_API AWeaponBase : public AActor
 public:	
 	UFUNCTION(BlueprintCallable)
 	void ToggleActive();
+
+	UFUNCTION(BlueprintCallable)
+	const UAttackDataAsset*  GetAttackDataByIndex(int Index) const { return WeaponDataAsset->GetAttackData(Index); }
+
+	UFUNCTION(BlueprintCallable)
+	int GetAttackCount() const { return WeaponDataAsset->GetAttackCount(); }
+
+	UFUNCTION(BlueprintCallable)
+	FSDamageInfo ConstructDamageInfo(int Index);
 
 protected:
 	// Sets default values for this actor's properties
@@ -30,6 +42,7 @@ protected:
 		AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
+protected:
 
 	//Member Variables
 	UPROPERTY(Category=Weapon, VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"))
@@ -38,7 +51,13 @@ protected:
 	UPROPERTY(Category=Weapon, VisibleAnywhere, BlueprintReadonly, meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<UCapsuleComponent> CapsuleComponent;
 
-	//helper variables
+	UPROPERTY(Category=Weapon, EditDefaultsOnly, BlueprintReadOnly)
+	UWeaponDataAsset* WeaponDataAsset;
+
+	//Helper methods
+	bool CanBeAttacked(AActor* TargetActor, AActor* OwningActor);
+
+	//Helper variables
 	bool IsActive = false;
 	TArray<AActor*> HitActors;
 };

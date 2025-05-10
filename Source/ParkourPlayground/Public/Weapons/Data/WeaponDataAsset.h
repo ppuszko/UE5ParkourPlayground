@@ -20,6 +20,12 @@ class PARKOURPLAYGROUND_API UWeaponDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	const UAttackDataAsset* GetAttackData(int Index) const;
+
+	UFUNCTION(BlueprintCallable)
+	int GetAttackCount() const { return AttackStyle.Num(); }
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attack Data")
 	EDamageType DamageType;
 	

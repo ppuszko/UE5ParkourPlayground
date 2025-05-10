@@ -1,0 +1,56 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Characters/CharacterBase.h"
+#include "Weapons/WeaponBase.h"
+#include "Engine/World.h"
+
+#include "ActorComponents/CharacterStatsComponent.h"
+
+// Sets default values
+ACharacterBase::ACharacterBase()
+{
+ 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	Stats = CreateDefaultSubobject<UCharacterStatsComponent>(TEXT("StatsComponent"));
+
+}
+
+// Called when the game starts or when spawned
+void ACharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (auto World = GetWorld())
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		Weapon = World->SpawnActor<AWeaponBase>(WeaponClass, FVector(), FRotator(), SpawnParams);
+		ensureMsgf(Weapon, TEXT("SpawnActor returned null for %s"), *WeaponClass->GetName());
+	}
+
+	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
+
+	Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
+	
+}
+
+// Called every frame
+void ACharacterBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+
+
+// Called to bind functionality to input
+void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+}
+

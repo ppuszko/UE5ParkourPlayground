@@ -13,7 +13,7 @@
  */
 
 
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class PARKOURPLAYGROUND_API UAttackDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

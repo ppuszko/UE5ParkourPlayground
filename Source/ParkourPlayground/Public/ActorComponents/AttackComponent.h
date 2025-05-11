@@ -28,6 +28,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AttackSystem")
 	int GetCurrentAttacIndex() const { return AttackIndex; }
 
+	void InitializeWhenOwnerIsReady();
+
 protected:
 
 	// Called when the game starts

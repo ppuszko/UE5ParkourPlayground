@@ -5,7 +5,7 @@
 
 const UAttackDataAsset* UWeaponDataAsset::GetAttackData(int Index) const
 {
-    if (Index > 0 && Index < AttackStyle.Num())
+    if (Index >= 0 && Index < AttackStyle.Num())
     {
         return AttackStyle[Index];
     }

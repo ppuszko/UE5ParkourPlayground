@@ -3,7 +3,7 @@
 
 #include "Characters/CharacterBase.h"
 #include "Weapons/WeaponBase.h"
-#include "ActorComponents/AttackComponent.h"
+
 #include "Engine/World.h"
 
 // Sets default values
@@ -31,7 +31,7 @@ void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto World = GetWorld())
+	if (UWorld* World = GetWorld())
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this;
@@ -44,6 +44,8 @@ void ACharacterBase::BeginPlay()
 	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
 
 	Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
+
+	AttackComponent->InitializeWhenOwnerIsReady();
 	
 }
 

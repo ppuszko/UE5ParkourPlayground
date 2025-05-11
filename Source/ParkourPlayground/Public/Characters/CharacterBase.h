@@ -8,6 +8,8 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTagAssetInterface.h"
 #include "Interfaces/Damageable.h"
+#include "ActorComponents/AttackComponent.h"
+#include "Weapons/WeaponBase.h"
 
 #include "CharacterBase.generated.h"
 
@@ -29,6 +31,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Components")
 	virtual bool TakeDamage(AActor* Causer) override;
+
+	UAttackComponent* GetAttackComponent() { return AttackComponent; }
 
 protected:
 	// Called when the game starts or when spawned

@@ -39,24 +39,26 @@ protected:
 	virtual void BeginPlay() override;
 
 	//Member variables
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float CurrentHealth;
 
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	float MaxHealth;
 
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	bool IsInvincible;
 
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	bool IsInterruptible;
 
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	bool IsBlocking;
 
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	bool IsDead;
 		
+	UPROPERTY(EditDefaultsOnly, Category = "Status")
+	FSStatusEffects StatusEffects;
 
 	//helper functions
 	bool CanReceiveDamage(bool CanDamageInvincible);

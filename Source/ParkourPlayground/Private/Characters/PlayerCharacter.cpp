@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ActorComponents/AttackComponent.h"
 
 
 
@@ -44,6 +45,11 @@ APlayerCharacter::APlayerCharacter() : ACharacterBase()
 	FollowCamera->bUsePawnControlRotation = false;
 }
 
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void APlayerCharacter::NotifyControllerChanged()
 {
 	Super::NotifyControllerChanged();
@@ -65,6 +71,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+		EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::LightAttack);
 	}
 }
 
@@ -94,4 +101,12 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void APlayerCharacter::LightAttack(const FInputActionValue& Value)
+{
+	
+
+	ensureMsgf(AttackComponent, TEXT("Attack component invalid!"));
+	AttackComponent->Attack();
 }

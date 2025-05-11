@@ -37,10 +37,15 @@ class PARKOURPLAYGROUND_API APlayerCharacter : public ACharacterBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* LightAttackAction;
+
 public:
 	APlayerCharacter();
 
 protected:
+
+	virtual void BeginPlay() override;
 
 	virtual void NotifyControllerChanged() override;
 
@@ -51,6 +56,8 @@ protected:
 	virtual void Move(const FInputActionValue& Value);
 
 	virtual void Look(const FInputActionValue& Value);
+
+	virtual void LightAttack(const FInputActionValue& Value);
 
 public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

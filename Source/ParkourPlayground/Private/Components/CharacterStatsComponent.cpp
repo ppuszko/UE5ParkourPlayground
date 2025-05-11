@@ -10,13 +10,23 @@ UCharacterStatsComponent::UCharacterStatsComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+
+	StatusEffects.CurrentBleedStatus = 0.f;
+	StatusEffects.CurrentFireStatus = 0.f;
+	StatusEffects.CurrentPoisonStatus = 0.f;
+	StatusEffects.CurrentStaggerStatus = 0.f;
+
+	StatusEffects.MaxBleedStatus = 0.f;
+	StatusEffects.MaxFireStatus = 0.f;
+	StatusEffects.MaxPoisonStatus = 0.f;
+	StatusEffects.MaxStaggerStatus = 0.f;
 }
 
 bool UCharacterStatsComponent::TakeDamage(FSDamageInfo DamageInfo, AActor* Causer)
 {
 	if (CanReceiveDamage(DamageInfo.CanDamageInvincible))
 	{
-		if (!IsBlocking && DamageInfo.CanBeBlocked)
+		if (IsBlocking && DamageInfo.CanBeBlocked)
 		{
 			OnBlocked.Broadcast();
 		}

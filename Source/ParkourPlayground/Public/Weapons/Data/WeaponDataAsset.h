@@ -14,7 +14,7 @@
  */
 
 
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class PARKOURPLAYGROUND_API UWeaponDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
@@ -26,13 +26,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetAttackCount() const { return AttackStyle.Num(); }
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attack Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attack Data")
 	EDamageType DamageType;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack Data")
 	float BaseDamage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack Data")
 	TArray<UAttackDataAsset*> AttackStyle;
 
 };

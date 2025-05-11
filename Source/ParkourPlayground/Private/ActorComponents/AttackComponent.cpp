@@ -4,6 +4,7 @@
 #include "ActorComponents/AttackComponent.h"
 #include "Characters/CharacterBase.h"
 #include "Weapons/WeaponBase.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values for this component's properties
 UAttackComponent::UAttackComponent()
@@ -28,6 +29,7 @@ void UAttackComponent::Attack()
 			//OwningCharacter->GetMesh()->GetAnimInstance()->Montage_Play()
 			IsAttacking = true;
 			OwningCharacter->GetMesh()->GetAnimInstance()->StopAllMontages(.2f);
+
 			UAnimMontage* MontageToPlay = OwningCharacter->GetWeapon()->GetAttackDataByIndex(AttackIndex)->AttackMontage;
 			OwningCharacter->PlayAnimMontage(MontageToPlay);
 			CanAttack = false;
@@ -51,15 +53,18 @@ void UAttackComponent::EvaluateCombo()
 	}
 }
 
+void UAttackComponent::InitializeWhenOwnerIsReady()
+{
+	OwningCharacter = Cast<ACharacterBase>(GetOwner());
+	checkf(OwningCharacter, TEXT("Actor: %s is not a valid AttackSystemOwner!"), *GetOwner()->GetName());
+	checkf(OwningCharacter->GetWeapon(), TEXT("Actor %s weapon in nullptr"), *GetOwner()->GetName());
+	AttackCount = OwningCharacter->GetWeapon()->GetAttackCount() - 1;
+}
+
 
 // Called when the game starts
 void UAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OwningCharacter = Cast<ACharacterBase>(GetOwner());
-	ensureMsgf(OwningCharacter, TEXT("Actor: %s is not a valid AttackSystemOwner!"), *GetOwner()->GetName());
-
-	AttackCount = OwningCharacter->GetWeapon()->GetAttackCount() - 1;
 }
 

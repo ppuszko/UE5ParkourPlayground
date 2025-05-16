@@ -9,7 +9,7 @@
 #include "CharacterStatsComponent.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, HealthPercent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, EDamageResponse, DamageResponse, AActor*, Instigator);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlocked);
@@ -26,13 +26,25 @@ public:
 
 	bool TakeDamage(FSDamageInfo DamageInfo, AActor* Causer);
 	
-	UPROPERTY(BlueprintAssignable, Category="Events")
-
 	//Event dispatchers
+	UPROPERTY(BlueprintAssignable, Category="Events")
 	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnDeath OnDeath;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnDamaged OnDamaged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnBlocked OnBlocked;
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Health")
+	float GetHealthPercent() const { return CurrentHealth / MaxHealth; };
+
+	UFUNCTION(BlueprintCallable, Category="Health")
+	void ToggleInvincibility(bool Invincible) { IsInvincible = Invincible; }
 
 protected:
 	// Called when the game starts

@@ -35,4 +35,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack Data")
 	TArray<UAttackDataAsset*> AttackStyle;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AttackData")
+	FTransform SocketTransform;
+
 };

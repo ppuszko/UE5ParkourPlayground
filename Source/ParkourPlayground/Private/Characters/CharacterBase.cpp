@@ -3,6 +3,8 @@
 
 #include "Characters/CharacterBase.h"
 #include "Weapons/WeaponBase.h"
+#include "Components/SkinnedMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 
 #include "Engine/World.h"
 
@@ -13,8 +15,9 @@ ACharacterBase::ACharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Stats = CreateDefaultSubobject<UCharacterStatsComponent>(TEXT("StatsComponent"));
-
 	AttackComponent = CreateDefaultSubobject<UAttackComponent>(TEXT("AttackComponent"));
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	GetCapsuleComponent()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 }
 
 
@@ -25,6 +28,7 @@ bool ACharacterBase::TakeDamage(AActor* Causer)
 
 	return Stats->TakeDamage(DamageInfo, Causer);
 }
+
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
@@ -43,10 +47,23 @@ void ACharacterBase::BeginPlay()
 
 	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
 
-	Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
+	if (Weapon != nullptr)
+	{
+		Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
+		Weapon->SetActorRelativeTransform(Weapon->GetWeaponSocketOffset());
 
-	AttackComponent->InitializeWhenOwnerIsReady();
-	
+		if (AttackComponent != nullptr)
+		{
+			AttackComponent->InitializeWhenOwnerIsReady();
+		}
+	}
+
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ACharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
 }
 
 // Called every frame

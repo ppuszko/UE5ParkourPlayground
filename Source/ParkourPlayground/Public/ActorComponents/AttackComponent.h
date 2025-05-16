@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "AttackComponent.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
+
 
 class ACharacterBase;
 
@@ -28,12 +32,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AttackSystem")
 	int GetCurrentAttacIndex() const { return AttackIndex; }
 
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
+	bool GetIsAttacking() const { return IsAttacking; }
+
 	void InitializeWhenOwnerIsReady();
 
-protected:
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAttack OnAttackFinished;
 
-	// Called when the game starts
-	virtual void BeginPlay() override;
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnAttack OnAttackStarted;
 
 protected:
 
@@ -54,5 +63,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackSystem")
 	ACharacterBase* OwningCharacter;
+
+
+
+	// Called when the game starts
+	virtual void BeginPlay() override;
 		
 };

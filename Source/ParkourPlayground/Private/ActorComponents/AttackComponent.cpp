@@ -26,13 +26,25 @@ void UAttackComponent::Attack()
 		}
 		else
 		{
-			//OwningCharacter->GetMesh()->GetAnimInstance()->Montage_Play()
-			IsAttacking = true;
-			OwningCharacter->GetMesh()->GetAnimInstance()->StopAllMontages(.2f);
+			UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
 
-			UAnimMontage* MontageToPlay = OwningCharacter->GetWeapon()->GetAttackDataByIndex(AttackIndex)->AttackMontage;
-			OwningCharacter->PlayAnimMontage(MontageToPlay);
-			CanAttack = false;
+
+
+			if (AnimInstance != nullptr)
+			{
+				if (UAnimMontage* MontageToPlay = OwningCharacter->GetWeapon()->GetAttackDataByIndex(AttackIndex)->AttackMontage)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Entered AnimMontage"));
+					IsAttacking = true;
+
+					AnimInstance->StopAllMontages(.2f);
+
+					AnimInstance->Montage_Play(MontageToPlay, 1.f);
+
+					OnAttackStarted.Broadcast();
+					CanAttack = false;
+				}
+			}
 		}
 	}
 }
@@ -41,24 +53,36 @@ void UAttackComponent::EvaluateCombo()
 {
 	if (ContinueCombo)
 	{
-		ContinueCombo = false;
 		AttackIndex++;
 		if (AttackIndex > AttackCount) AttackIndex = 0;
+
+
 		Attack();
+		ContinueCombo = false;
 	}
 	else
 	{
 		AttackIndex = 0;
 		IsAttacking = false;
+		OnAttackFinished.Broadcast();
 	}
 }
 
 void UAttackComponent::InitializeWhenOwnerIsReady()
 {
 	OwningCharacter = Cast<ACharacterBase>(GetOwner());
-	checkf(OwningCharacter, TEXT("Actor: %s is not a valid AttackSystemOwner!"), *GetOwner()->GetName());
-	checkf(OwningCharacter->GetWeapon(), TEXT("Actor %s weapon in nullptr"), *GetOwner()->GetName());
-	AttackCount = OwningCharacter->GetWeapon()->GetAttackCount() - 1;
+
+	ensureMsgf(OwningCharacter, TEXT("Actor: %s is not a valid AttackSystemOwner!"), *GetOwner()->GetName());
+	ensureMsgf(OwningCharacter->GetWeapon(), TEXT("Actor %s weapon in nullptr"), *GetOwner()->GetName());
+
+	if (OwningCharacter != nullptr)
+	{
+		if (OwningCharacter->GetWeapon() != nullptr)
+		{
+			AttackCount = OwningCharacter->GetWeapon()->GetAttackCount() - 1;
+		}
+	}
+
 }
 
 

@@ -13,8 +13,6 @@
 
 #include "CharacterBase.generated.h"
 
-class UAttackComponent;
-class AWeaponBase;
 //something
 
 UCLASS()
@@ -32,16 +30,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Components")
 	virtual bool TakeDamage(AActor* Causer) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool GetIsRolling() const { return IsRolling; }
+
 	UAttackComponent* GetAttackComponent() { return AttackComponent; }
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+
+protected:
+
+	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category="Components")
 	UCharacterStatsComponent* Stats;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category="Components")
 	UAttackComponent* AttackComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Weapon")
@@ -56,11 +58,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Team")
 	FGameplayTagContainer TeamTags;
 
-public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	bool IsRolling;
 
-	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montages")
+	UAnimMontage* DeathAnim;
 
-	
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 
 public:	
 	// Called every frame

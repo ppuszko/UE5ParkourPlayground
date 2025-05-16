@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
 #include "PlayerControllerBase.generated.h"
 
 /**
@@ -14,4 +15,7 @@ class PARKOURPLAYGROUND_API APlayerControllerBase : public APlayerController
 {
 	GENERATED_BODY()
 	
+
+
+
 };

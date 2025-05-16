@@ -16,10 +16,13 @@ UCharacterStatsComponent::UCharacterStatsComponent()
 	StatusEffects.CurrentPoisonStatus = 0.f;
 	StatusEffects.CurrentStaggerStatus = 0.f;
 
-	StatusEffects.MaxBleedStatus = 0.f;
-	StatusEffects.MaxFireStatus = 0.f;
-	StatusEffects.MaxPoisonStatus = 0.f;
-	StatusEffects.MaxStaggerStatus = 0.f;
+	StatusEffects.MaxBleedStatus = 100.f;
+	StatusEffects.MaxFireStatus = 100.f;
+	StatusEffects.MaxPoisonStatus = 100.f;
+	StatusEffects.MaxStaggerStatus = 100.f;
+
+	CurrentHealth = 20.f;
+	MaxHealth = 100.f;
 }
 
 bool UCharacterStatsComponent::TakeDamage(FSDamageInfo DamageInfo, AActor* Causer)
@@ -30,18 +33,19 @@ bool UCharacterStatsComponent::TakeDamage(FSDamageInfo DamageInfo, AActor* Cause
 		{
 			OnBlocked.Broadcast();
 		}
-		else
+		else if(!IsDead)
 		{
 			CurrentHealth = FMath::Clamp(CurrentHealth - DamageInfo.DamageAmount, 0.f, MaxHealth);
-			if (CurrentHealth > 0.f)
-			{
-				OnDamaged.Broadcast(DamageInfo.DamageResponse, GetOwner());
-			}
-			else
+			
+			OnDamaged.Broadcast(DamageInfo.DamageResponse, GetOwner());
+			
+			if (CurrentHealth <= 0.f)
 			{
 				OnDeath.Broadcast();
+				IsDead = true;
 			}
-			OnHealthChanged.Broadcast(CurrentHealth / MaxHealth);
+
+			OnHealthChanged.Broadcast();
 			return true;
 		}
 	}

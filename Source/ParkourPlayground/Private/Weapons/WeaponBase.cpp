@@ -30,6 +30,7 @@ AWeaponBase::AWeaponBase()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Mesh = CreateOptionalDefaultSubobject<UStaticMeshComponent>("WeaponMesh");
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	RootComponent = Mesh;
 
@@ -39,6 +40,8 @@ AWeaponBase::AWeaponBase()
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	//CapsuleComponent->SetCollisionProfileName(TEXT("Trigger"));
 	CapsuleComponent->SetupAttachment(RootComponent);
+
+	IsActive = false;
 }
 
 // Called when the game starts or when spawned
@@ -47,13 +50,13 @@ void AWeaponBase::BeginPlay()
 	Super::BeginPlay();
 	
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::HandleOverlapBegin);
 
 }
 
 void AWeaponBase::HandleOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AActor* WeaponOwner = Cast<ACharacterBase>(OverlappedComp->GetOwner()->GetOwner());
-
+	AActor* WeaponOwner = Cast<AActor>(OverlappedComp->GetOwner()->GetOwner());
 	if (WeaponOwner && WeaponOwner != OtherActor)
 	{
 		if (HitActors.Contains(OtherActor)) { return; }
@@ -64,13 +67,9 @@ void AWeaponBase::HandleOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 				HitActors.Add(OtherActor);
 				if (IDamageable* ActorToHit = Cast<IDamageable>(OtherActor))
 				{
-
 					ActorToHit->TakeDamage(WeaponOwner);
 				}
-
 			}
-			
-
 		}
 	}
 }

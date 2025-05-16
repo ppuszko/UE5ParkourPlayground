@@ -30,6 +30,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FSDamageInfo ConstructDamageInfo(int Index);
 
+	UFUNCTION(BlueprintCallable)
+	FTransform GetWeaponSocketOffset() const { return WeaponDataAsset->SocketTransform; }
+
+	UFUNCTION(BlueprintCallable)
+	void ClearHitActors() { HitActors.Empty(); }
+
+	UFUNCTION(BlueprintCallable)
+	UCapsuleComponent* GetCollider() { return CapsuleComponent.Get(); }
+
 protected:
 	// Sets default values for this actor's properties
 	AWeaponBase();
@@ -58,6 +67,6 @@ protected:
 	bool CanBeAttacked(AActor* TargetActor, AActor* OwningActor);
 
 	//Helper variables
-	bool IsActive = false;
+	bool IsActive;
 	TArray<AActor*> HitActors;
 };

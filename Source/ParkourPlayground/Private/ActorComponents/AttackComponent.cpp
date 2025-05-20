@@ -45,7 +45,6 @@ void UAttackComponent::PlayAttackMontage()
 
 	if (AnimInstance != nullptr && MontageToPlay != nullptr)
 	{
-		CanAttack = false;
 		//AnimInstance->StopAllMontages(.2f);
 		AnimInstance->Montage_Play(MontageToPlay, 1.f);
 		OnAttackStarted.Broadcast();

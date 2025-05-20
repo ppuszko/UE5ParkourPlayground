@@ -12,29 +12,36 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttack);
 
 class ACharacterBase;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PARKOURPLAYGROUND_API UAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UAttackComponent();
 
 	void AllowComboContinuation() { CanAttack = true; }
 
-	UFUNCTION(BlueprintCallable, Category="AttackSystem")
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
 	void Attack();
 
 	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
-	void EvaluateCombo();
-
-	UFUNCTION(BlueprintCallable, Category="AttackSystem")
 	int GetCurrentAttacIndex() const { return AttackIndex; }
 
 	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
 	bool GetIsAttacking() const { return IsAttacking; }
 
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
+	void SetCanQueryCombo(bool bQueryCombo) { CanQueryCombo = bQueryCombo; }
+
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
+	void PlayAttackMontage();
+
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
+	void ResetAttackState() { IsAttacking = false; AttackIndex = 0; }
+
+	UFUNCTION(BlueprintCallable, Category = "AttackSystem")
 	void InitializeWhenOwnerIsReady();
 
 public:
@@ -53,6 +60,9 @@ protected:
 	bool ContinueCombo = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackSystem")
+	bool CanQueryCombo = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackSystem")
 	bool CanAttack = true;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackSystem")
@@ -68,5 +78,5 @@ protected:
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
-		
+
 };

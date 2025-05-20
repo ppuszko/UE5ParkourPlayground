@@ -10,5 +10,6 @@ void UANVaultFinish::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase*
 	{
 		Player->SetMovementMode();
 		Player->SetHasVaulted(false);
+		Player->SetIsVaulting(false);
 	}
 }

@@ -6,6 +6,7 @@
 #include "Characters/CharacterBase.h"
 #include "Materials/MaterialInterface.h"
 
+
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -49,12 +50,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SetMovementMode(ECollisionResponse Response = ECollisionResponse::ECR_Block, EMovementMode Mode = EMovementMode::MOVE_Walking, bool ShouldTestCameraCollision = true);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SetIsRolling(bool bIsRolling) { IsRolling = bIsRolling; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SetIsVaulting(bool bIsVaulting) { IsVaulting = bIsVaulting; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool GetIsVaulting() const { return IsVaulting; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SetHasVaulted(bool bHasVaulted) { HasVaulted = bHasVaulted; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool GetIsAttacking() const { return AttackComponent != nullptr ? AttackComponent->GetIsAttacking() : false; }
 
 	virtual void ToggleInvincibility(bool Invincible) override;
 
+
+
 	AEnemyCharacterBase* FocusedObject;
+
+
 
 private:
 
@@ -94,6 +111,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* TargetLockAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SwapWeaponAction;
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
@@ -112,7 +132,7 @@ protected:
 	bool IsSprinting;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	bool CanMove;
+	bool IsVaulting;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	UAnimMontage* RollMontage;
@@ -171,6 +191,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Events")
 	void OnVaultEnded(UAnimMontage* Montage, bool bIsInterrupted);
 
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	void OnRollEnded(UAnimMontage* Montage, bool bIsInterrupted);
+
 	UFUNCTION(BlueprintCallable, Category = "TargetFocus")
 	void CalculateFocusCandidate();
 
@@ -192,6 +215,7 @@ protected:
 	virtual void JumpStart(const FInputActionValue& Value);
 	virtual void JumpEnd(const FInputActionValue& Value);
 	virtual void TargetLock(const FInputActionValue& Value);
+	virtual void SwapWeapon(const FInputActionValue& Value);
 
 protected:
 	FTimerHandle StaminaTimer;

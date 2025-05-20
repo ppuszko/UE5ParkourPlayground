@@ -21,8 +21,9 @@ UCharacterStatsComponent::UCharacterStatsComponent()
 	StatusEffects.MaxPoisonStatus = 100.f;
 	StatusEffects.MaxStaggerStatus = 100.f;
 
-	CurrentHealth = 20.f;
+	CurrentHealth = 100.f;
 	MaxHealth = 100.f;
+	IsDead = false;
 }
 
 bool UCharacterStatsComponent::TakeDamage(FSDamageInfo DamageInfo, AActor* Causer)

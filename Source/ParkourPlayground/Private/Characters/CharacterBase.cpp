@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
 
 
 #include "Characters/CharacterBase.h"
@@ -29,6 +29,41 @@ bool ACharacterBase::TakeDamage(AActor* Causer)
 	return Stats->TakeDamage(DamageInfo, Causer);
 }
 
+//temporary
+void ACharacterBase::SwapWeapons()
+{
+	CurrWeaponIndex++;
+	if (CurrWeaponIndex > 2) CurrWeaponIndex = 0;
+
+	TSubclassOf<AWeaponBase> ToSpawn;
+	if (CurrWeaponIndex == 1) ToSpawn = SpareWeaponClass;
+	else if (CurrWeaponIndex == 2) ToSpawn = SpareWeaponClass2;
+	else if (CurrWeaponIndex == 0) ToSpawn = WeaponClass;
+
+	Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	Weapon->Destroy();
+	Weapon = nullptr;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	Weapon = GetWorld()->SpawnActor<AWeaponBase>(ToSpawn, FVector(), FRotator(), SpawnParams);
+
+	FAttachmentTransformRules AttachmentRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
+
+	if (Weapon != nullptr)
+	{
+		Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
+		Weapon->SetActorRelativeTransform(Weapon->GetWeaponSocketOffset());
+
+		if (AttackComponent != nullptr)
+		{
+			AttackComponent->InitializeWhenOwnerIsReady();
+		}
+	}
+}
+
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
@@ -51,7 +86,6 @@ void ACharacterBase::BeginPlay()
 	{
 		Weapon->AttachToComponent(GetMesh(), AttachmentRules, WeaponSocketName);
 		Weapon->SetActorRelativeTransform(Weapon->GetWeaponSocketOffset());
-
 		if (AttackComponent != nullptr)
 		{
 			AttackComponent->InitializeWhenOwnerIsReady();

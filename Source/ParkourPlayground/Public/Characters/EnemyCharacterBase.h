@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Characters/CharacterBase.h"
-#include "AI/Controllers/AIControllerBase.h"
 #include "Components/WidgetComponent.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "EnemyCharacterBase.generated.h"
 
@@ -26,6 +25,15 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	bool GetIsAttacking() const { return AttackComponent != nullptr ? AttackComponent->GetIsAttacking() : false; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SwitchToChase() { GetCharacterMovement()->MaxWalkSpeed = RunningWalkSpeed; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SwitchToWalk() { GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed; }
+
 	void ManageHUDDisplay(bool ShouldDisplay);
 
 protected:
@@ -36,9 +44,6 @@ protected:
 	void OnHealthChanged();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	TSubclassOf<AAIControllerBase> AICClass;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="HUD")
 	UWidgetComponent* HealthWidgetComponent;
 
@@ -50,6 +55,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
 	bool ShouldDisplayHUD;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float DefaultWalkSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float RunningWalkSpeed;
 
 
 	virtual void Tick(float DeltaTime) override;

@@ -17,54 +17,38 @@ UAttackComponent::UAttackComponent()
 }
 
 void UAttackComponent::Attack()
-{
+{ 
 	if (CanAttack)
 	{
-		if (IsAttacking && !ContinueCombo)
+		if (IsAttacking)
 		{
-			ContinueCombo = true;
+			CanAttack = false;
+			AttackIndex++;
+			if (AttackIndex > AttackCount) AttackIndex = 0;
+			PlayAttackMontage();
+
 		}
 		else
 		{
-			UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
-
-
-
-			if (AnimInstance != nullptr)
-			{
-				if (UAnimMontage* MontageToPlay = OwningCharacter->GetWeapon()->GetAttackDataByIndex(AttackIndex)->AttackMontage)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Entered AnimMontage"));
-					IsAttacking = true;
-
-					AnimInstance->StopAllMontages(.2f);
-
-					AnimInstance->Montage_Play(MontageToPlay, 1.f);
-
-					OnAttackStarted.Broadcast();
-					CanAttack = false;
-				}
-			}
+			CanAttack = false;
+			IsAttacking = true;
+			PlayAttackMontage();
 		}
 	}
 }
 
-void UAttackComponent::EvaluateCombo()
+void UAttackComponent::PlayAttackMontage()
 {
-	if (ContinueCombo)
-	{
-		AttackIndex++;
-		if (AttackIndex > AttackCount) AttackIndex = 0;
+	UAnimInstance* AnimInstance = OwningCharacter->GetMesh()->GetAnimInstance();
+	if (!OwningCharacter->GetWeapon()) return;
+	UAnimMontage* MontageToPlay = OwningCharacter->GetWeapon()->GetAttackDataByIndex(AttackIndex)->AttackMontage;
 
-
-		Attack();
-		ContinueCombo = false;
-	}
-	else
+	if (AnimInstance != nullptr && MontageToPlay != nullptr)
 	{
-		AttackIndex = 0;
-		IsAttacking = false;
-		OnAttackFinished.Broadcast();
+		CanAttack = false;
+		//AnimInstance->StopAllMontages(.2f);
+		AnimInstance->Montage_Play(MontageToPlay, 1.f);
+		OnAttackStarted.Broadcast();
 	}
 }
 

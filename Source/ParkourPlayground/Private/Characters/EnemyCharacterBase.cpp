@@ -6,16 +6,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+
+#include "AI/Controllers/AIControllerBase.h"
 
 AEnemyCharacterBase::AEnemyCharacterBase() : ACharacterBase()
 {
-	if (AICClass)
-	{
-		AIControllerClass = AICClass;
-		AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-	}
-	
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HeathBarComponent"));
 	HealthWidgetComponent->SetupAttachment(RootComponent);
 
@@ -23,6 +20,9 @@ AEnemyCharacterBase::AEnemyCharacterBase() : ACharacterBase()
 	HealthWidgetComponent->SetDrawSize(FVector2D(300.f, 50.f));
 	HealthWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	HealthWidgetComponent->SetVisibility(false);
+
+	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
+	RunningWalkSpeed = 500.f;
 
 	ShouldDisplayHUD = false;
 }

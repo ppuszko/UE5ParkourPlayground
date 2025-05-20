@@ -14,12 +14,12 @@ void AWeaponBase::ToggleActive()
 	if (IsActive)
 	{
 		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		CapsuleComponent->SetHiddenInGame(true);
+		//CapsuleComponent->SetHiddenInGame(true);
 	}
 	else
 	{
 		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		CapsuleComponent->SetHiddenInGame(false);
+		//CapsuleComponent->SetHiddenInGame(false);
 	}
 	IsActive = !IsActive;
 }

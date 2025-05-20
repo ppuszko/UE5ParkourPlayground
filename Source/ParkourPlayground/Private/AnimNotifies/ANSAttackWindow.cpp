@@ -4,6 +4,7 @@
 #include "AnimNotifies/ANSAttackWindow.h"
 #include "Characters/CharacterBase.h"
 #include "ActorComponents/AttackComponent.h"
+#include "Animation/AnimNotifyLibrary.h"
 
 void UANSAttackWindow::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
@@ -16,8 +17,9 @@ void UANSAttackWindow::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequen
 
 void UANSAttackWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	if (CharacterRef)
+	if (CharacterRef && UAnimNotifyLibrary::NotifyStateReachedEnd(EventReference))
 	{
-		CharacterRef->GetAttackComponent()->EvaluateCombo();
+		CharacterRef->GetAttackComponent()->OnAttackFinished.Broadcast();
+		CharacterRef->GetAttackComponent()->ResetAttackState();
 	}
 }

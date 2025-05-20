@@ -8,7 +8,7 @@
 
 #include "CharacterStatsComponent.generated.h"
 
-
+//
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, EDamageResponse, DamageResponse, AActor*, Instigator);
@@ -45,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void ToggleInvincibility(bool Invincible) { IsInvincible = Invincible; }
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	bool GetIsDead() const { return IsDead; }
 
 protected:
 	// Called when the game starts

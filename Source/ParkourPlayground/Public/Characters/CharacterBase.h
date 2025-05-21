@@ -10,13 +10,14 @@
 #include "Interfaces/Damageable.h"
 #include "ActorComponents/AttackComponent.h"
 #include "Weapons/WeaponBase.h"
+#include "GenericTeamAgentInterface.h"
 
 #include "CharacterBase.generated.h"
 
 //something
 
 UCLASS()
-class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IGameplayTagAssetInterface, public IDamageable
+class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IGameplayTagAssetInterface, public IDamageable, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -48,9 +49,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
 
+public:
+
 	void SwapWeapons();
 
+	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
 protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Team")
+	FGenericTeamId CharacterTeamId;
 
 	UPROPERTY(VisibleAnywhere, Instanced, BlueprintReadOnly, Category="Components")
 	UCharacterStatsComponent* Stats;

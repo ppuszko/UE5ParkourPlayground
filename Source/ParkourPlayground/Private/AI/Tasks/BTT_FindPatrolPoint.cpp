@@ -5,7 +5,8 @@
 #include "AIController.h"
 #include "Characters/EnemyCharacterBase.h"
 #include "NavigationSystem.h"
-
+#include "Navigation/PathFollowingComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 EBTNodeResult::Type UBTT_FindPatrolPoint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -18,21 +19,21 @@ EBTNodeResult::Type UBTT_FindPatrolPoint::ExecuteTask(UBehaviorTreeComponent& Ow
 
 	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
 
-	if (ControlledPawn && World && NavSys)
-	{
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 
+	if (ControlledPawn && World && NavSys && BB)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Entered condition"));
 		ControlledPawn->SwitchToWalk();
 
 		FNavLocation RandomPoint;
 		if (NavSys->GetRandomReachablePointInRadius(ControlledPawn->GetActorLocation(), Radius, RandomPoint))
 		{
-			UBTFunctionLibrary::SetBlackboardValueAsVector(this, PatrolLocation, RandomPoint.Location);
-		}
-		else
-		{
-			UBTFunctionLibrary::SetBlackboardValueAsVector(this, PatrolLocation, ControlledPawn->GetActorLocation());
-		}
+			BB->SetValueAsVector(TargetLocationKey, RandomPoint.Location);
+			AIController->MoveToLocation(RandomPoint.Location, 5.f);
 
+			
+		}
 		return EBTNodeResult::Succeeded;
 	}
 	else return EBTNodeResult::Failed;

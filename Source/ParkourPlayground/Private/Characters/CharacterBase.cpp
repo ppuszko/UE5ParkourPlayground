@@ -5,6 +5,8 @@
 #include "Weapons/WeaponBase.h"
 #include "Components/SkinnedMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "DataTypes/DataTypes.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "Engine/World.h"
 
@@ -18,6 +20,8 @@ ACharacterBase::ACharacterBase()
 	AttackComponent = CreateDefaultSubobject<UAttackComponent>(TEXT("AttackComponent"));
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+
+	SetGenericTeamId(FGenericTeamId(static_cast<uint8>(EAffiliation::Neutral)));	
 }
 
 
@@ -62,6 +66,16 @@ void ACharacterBase::SwapWeapons()
 			AttackComponent->InitializeWhenOwnerIsReady();
 		}
 	}
+}
+
+void ACharacterBase::SetGenericTeamId(const FGenericTeamId& TeamID)
+{
+	CharacterTeamId = TeamID;
+}
+
+FGenericTeamId ACharacterBase::GetGenericTeamId() const
+{
+	return CharacterTeamId;
 }
 
 

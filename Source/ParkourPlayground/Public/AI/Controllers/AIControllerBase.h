@@ -23,17 +23,41 @@ public:
 	AAIControllerBase();
 
 protected:
+	UFUNCTION()
 	void OnSightPerceptionUpdated(AActor* SourceActor, FAIStimulus Stimulus);
+
+	void OnTimer();
+
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UBehaviorTree* BehaviorTree;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAISenseConfig_Sight* SightConfig;
 
+	UPROPERTY(EditDefaultsOnly, Category="AI")
+	float ChaseTimeAfterLostSight = 4.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI|Keys")
+	FName LineOfSightKey;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI|Keys")
+	FName TargetActorKey;
+
+	float TimeElapsed = 0.f;
+
+	FTimerHandle LineOfSightTimer;
+
+
+
+protected:
 	virtual void BeginPlay() override;
+
+	virtual void OnPossess(APawn* InPawn) override;
 
 };

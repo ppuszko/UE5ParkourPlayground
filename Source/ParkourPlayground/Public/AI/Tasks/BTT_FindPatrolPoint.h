@@ -17,11 +17,8 @@ class PARKOURPLAYGROUND_API UBTT_FindPatrolPoint : public UBTTaskBase
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FBlackboardKeySelector PatrolLocation;
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "AI/Controllers/AIControllerBase.h"
 
@@ -21,10 +22,15 @@ AEnemyCharacterBase::AEnemyCharacterBase() : ACharacterBase()
 	HealthWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	HealthWidgetComponent->SetVisibility(false);
 
+	DefaultWalkSpeed = 300.f;
 	GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed;
 	RunningWalkSpeed = 500.f;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	bUseControllerRotationYaw = true;
 
 	ShouldDisplayHUD = false;
+
+	SetGenericTeamId(FGenericTeamId(static_cast<uint8>(EAffiliation::Hostile)));
 }
 
 void AEnemyCharacterBase::BeginPlay()
@@ -48,6 +54,13 @@ void AEnemyCharacterBase::BeginPlay()
 	{
 		Stats->OnDeath.AddDynamic(this, &AEnemyCharacterBase::OnDeath);
 		Stats->OnHealthChanged.AddDynamic(this, &AEnemyCharacterBase::OnHealthChanged);
+	}
+
+
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (MoveComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Movement Mode: %d"), (int32)MoveComp->MovementMode);
 	}
 }
 

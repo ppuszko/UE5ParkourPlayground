@@ -20,6 +20,13 @@ enum class EDamageType : uint8
 	Poison
 };
 
+UENUM(BlueprintType)
+enum class EAffiliation : uint8
+{
+	Neutral = 0 UMETA(DisplayName="Neutral"),
+	Hostile UMETA(DisplayName="Hostile")
+};
+
 USTRUCT(BlueprintType)
 struct FSDamageInfo
 {

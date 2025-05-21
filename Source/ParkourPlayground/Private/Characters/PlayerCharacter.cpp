@@ -577,7 +577,7 @@ bool APlayerCharacter::IsNearObstacle()
 				VaultStart = HitResult.ImpactPoint;
 				uint8 VaultScore = 0;
 				if (HitResult.ImpactPoint.Z - GetActorLocation().Z >= 110.f) VaultScore += 2;
-				if (FVector::DistXY(GetActorLocation(), VaultStart) >= 200.f) VaultScore += 1;
+				if (FVector::DistXY(GetActorLocation(), VaultStart) >= 250.f) VaultScore += 1;
 				VaultType = static_cast<EVaultType>(VaultScore);
 
 				TraceStart = HitResult.ImpactPoint + GetActorForwardVector() * 300.f;

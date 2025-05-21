@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "GenericTeamAgentInterface.h"
+
 
 #include "PlayerControllerBase.generated.h"
 

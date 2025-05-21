@@ -1,6 +1,6 @@
 # Welcome to UE 5 ParkourPlayground - an exploratory project where I try to implement systems from video games which i found interesting.
 ## Currently implemented:
-### 1. Parkour-ish vault system, allowing to traverse smaller obstacles and climb on walls. 
+### 1. Parkour vaulting system, allowing to traverse smaller obstacles and climb on walls. 
 ### 2. Target selecting/locking system, highlighting object closest to camera's look at angle, with possibility to lock on currently focused target
 ### 3. Weapon-focused combat system, where player's attack style is dictated by the currently wielded weapon.
 

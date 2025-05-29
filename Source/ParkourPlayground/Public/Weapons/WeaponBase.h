@@ -22,7 +22,10 @@ public:
 	void ToggleActive();
 
 	UFUNCTION(BlueprintCallable)
-	const UAttackDataAsset*  GetAttackDataByIndex(int Index) const { return WeaponDataAsset->GetAttackData(Index); }
+	const UAttackDataAsset*  GetAttackDataByIndex(int Index)  const { return WeaponDataAsset->GetAttackData(Index); }
+
+	UFUNCTION(BlueprintCallable)
+	const UWeaponDataAsset* GetWeaponDataAsset()  const { return WeaponDataAsset; }
 
 	UFUNCTION(BlueprintCallable)
 	int GetAttackCount() const { return WeaponDataAsset->GetAttackCount(); }

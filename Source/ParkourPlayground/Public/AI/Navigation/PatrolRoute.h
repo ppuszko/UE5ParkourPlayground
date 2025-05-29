@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SplineComponent.h"
+
 #include "PatrolRoute.generated.h"
 
-UCLASS()
+
+UCLASS(Blueprintable)
 class PARKOURPLAYGROUND_API APatrolRoute : public AActor
 {
 	GENERATED_BODY()
@@ -14,6 +17,22 @@ class PARKOURPLAYGROUND_API APatrolRoute : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APatrolRoute();
+
+	UFUNCTION(BlueprintCallable, Category = "Navigation")
+	void IncrementPatrolIndex();
+	
+	UFUNCTION(BlueprintCallable, Category = "Navigation")
+	FVector GetCurrentPatrolDestination(){ return PatrolRoute->GetLocationAtSplinePoint(CurrentPatrolIndex, ESplineCoordinateSpace::World); }
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = "Navigation")
+	USplineComponent* PatrolRoute;
+
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = "Navigation")
+	int CurrentPatrolIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = "Navigation")
+	int PatrolDirection;
 
 protected:
 	// Called when the game starts or when spawned

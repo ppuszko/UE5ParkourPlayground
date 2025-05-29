@@ -65,13 +65,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool GetIsAttacking() const { return AttackComponent != nullptr ? AttackComponent->GetIsAttacking() : false; }
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	float GetHighFallVelocityThreshold() const { return HighFallVelocityThreshold; }
+
 	virtual void ToggleInvincibility(bool Invincible) override;
 
-
-
 	AEnemyCharacterBase* FocusedObject;
-
-
 
 private:
 
@@ -134,14 +133,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool IsVaulting;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montages")
 	UAnimMontage* RollMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Montages")
+	TMap<EVaultType, UAnimMontage*> VaultMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = "Movement")
 	EVaultType VaultType;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadonly, Category = "Movement")
-	TMap<EVaultType, UAnimMontage*> VaultMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
 	float CurrentStamina;
@@ -155,7 +154,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Collision")
 	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_WorldStatic;
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> LandingCameraShake;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> HardLandingCameraShake;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
+	float HighFallVelocityThreshold;
 
 protected:
 
@@ -175,12 +181,6 @@ protected:
 	void UpdateStamina();
 
 	UFUNCTION(BlueprintCallable, Category = "Events")
-	void OnAttackStarted();
-
-	UFUNCTION(BlueprintCallable, Category = "Events")
-	void OnAttackFinished();
-
-	UFUNCTION(BlueprintCallable, Category = "Events")
 	void OnDetectionRadiusBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -189,10 +189,13 @@ protected:
 		int32 OtherBodyIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "Events")
-	void OnVaultEnded(UAnimMontage* Montage, bool bIsInterrupted);
+	void OnVaultFinished(UAnimMontage* Montage, bool bIsInterrupted);
 
 	UFUNCTION(BlueprintCallable, Category = "Events")
-	void OnRollEnded(UAnimMontage* Montage, bool bIsInterrupted);
+	void OnRollFinished(UAnimMontage* Montage, bool bIsInterrupted);
+
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	void OnHealthChanged();
 
 	UFUNCTION(BlueprintCallable, Category = "TargetFocus")
 	void CalculateFocusCandidate();
@@ -202,6 +205,10 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool IsNearObstacle();
+
+	virtual void OnAttackStarted() override;
+
+	virtual void OnAttackFinished() override;
 
 
 protected:
@@ -236,6 +243,8 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 
 };

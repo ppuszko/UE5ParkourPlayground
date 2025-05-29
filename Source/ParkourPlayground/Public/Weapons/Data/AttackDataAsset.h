@@ -19,6 +19,10 @@ class PARKOURPLAYGROUND_API UAttackDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "AttackData")
+	UAnimMontage* GetAttackMontage() { return AttackMontage; }
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Attack Data")
 	UAnimMontage* AttackMontage;
 
@@ -33,4 +37,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data");
 	bool CanForceInterrupt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data");
+	bool IsSpecial = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data");
+	float SpecialAreaOfEffect = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack Data");
+	float SpecialDamage = 0.f;
 };

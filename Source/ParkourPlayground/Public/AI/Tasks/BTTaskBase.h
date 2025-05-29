@@ -15,14 +15,5 @@ class PARKOURPLAYGROUND_API UBTTaskBase : public UBTTaskNode
 	GENERATED_BODY()
 	
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "AI|Keys")
-	FName LineOfSightKey = TEXT("HasLineOfSight");
-
-	UPROPERTY(EditDefaultsOnly, Category = "AI|Keys")
-	FName TargetActorKey = TEXT("TargetActor");
-
-
-	UPROPERTY(EditAnywhere, Category = "AI|Keys")
-	FName TargetLocationKey = TEXT("TargetLocation");
 
 };

@@ -20,6 +20,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius;
 
+	UPROPERTY(EditAnywhere, Category = "AI|Keys")
+	FName TargetLocationKey = TEXT("TargetLocation");
+
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	

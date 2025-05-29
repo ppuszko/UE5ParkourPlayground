@@ -14,26 +14,14 @@ EBTNodeResult::Type UBTT_FindPatrolPoint::ExecuteTask(UBehaviorTreeComponent& Ow
 	if (!AIController) return EBTNodeResult::Failed;
 
 	AEnemyCharacterBase* ControlledPawn = Cast<AEnemyCharacterBase>(AIController->GetPawn());
-	UWorld* World = OwnerComp.GetWorld();
-
-
-	UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
 
 	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 
-	if (ControlledPawn && World && NavSys && BB)
+	if (ControlledPawn && BB)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Entered condition"));
 		ControlledPawn->SwitchToWalk();
+		BB->SetValueAsVector(TargetLocationKey, ControlledPawn->GetAndUpdatePatrolLocation());
 
-		FNavLocation RandomPoint;
-		if (NavSys->GetRandomReachablePointInRadius(ControlledPawn->GetActorLocation(), Radius, RandomPoint))
-		{
-			BB->SetValueAsVector(TargetLocationKey, RandomPoint.Location);
-			AIController->MoveToLocation(RandomPoint.Location, 5.f);
-
-			
-		}
 		return EBTNodeResult::Succeeded;
 	}
 	else return EBTNodeResult::Failed;

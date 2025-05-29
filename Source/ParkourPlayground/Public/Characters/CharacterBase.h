@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
 
 #pragma once
 
@@ -14,7 +14,6 @@
 
 #include "CharacterBase.generated.h"
 
-//something
 
 UCLASS()
 class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IGameplayTagAssetInterface, public IDamageable, public IGenericTeamAgentInterface
@@ -25,8 +24,21 @@ public:
 	// Sets default values for this character's properties
 	ACharacterBase();
 
-	UFUNCTION(BlueprintCallable, Category="Components")
-	virtual bool TakeDamage(AActor* Causer) override;
+	// Start IDamageable interface //
+
+	UFUNCTION(BlueprintCallable, Category="IDamageable")
+	virtual bool TakeDamage(AActor* Causer, bool HitReactRight) override;
+
+	UFUNCTION(BlueprintCallable, Category = "IDamageable")
+	virtual bool ShouldResolveAttackCollision(AActor* AttackingActor) override;
+
+	UFUNCTION(BlueprintCallable, Category = "IDamageable")
+	virtual bool CalculateHitDirection(FVector HitLocation, FVector& ResultingHitDirection) override;
+
+	// Finish IDamageable interface //
+
+	UFUNCTION(BlueprintCallable, Category="Movement")
+	void SetIsInterruptible(bool bIsInterruptible) { IsInterruptible = bIsInterruptible; }
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SetCanMove(bool bCanMove) { CanMove = bCanMove; }
@@ -40,8 +52,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool GetIsDead() const { return Stats != nullptr ? Stats->GetIsDead() : false; }
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	virtual void SetTargetActor(AActor* InTargetActor) { TargetActor = InTargetActor; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	virtual const AActor* GetTargetActor() const { return TargetActor; }
+
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	AWeaponBase* GetWeapon() const { return Weapon; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void StartPiercingDash();
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void EndPiercingDash();
 
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	UAttackComponent* GetAttackComponent() { return AttackComponent; }
@@ -49,13 +73,35 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Combat")
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
 
+	
+
 public:
 
 	void SwapWeapons();
 
+	// Start IGenericTeamAgentInterface // 
+
 	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+
+	// Finish IGenericTeamAgentInterface //
+
+protected:
+
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	virtual void OnAttackStarted();
+
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	virtual void OnAttackFinished();
+
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	virtual void OnDamaged(EDamageResponse DamageResponse, AActor* Causer, bool HitReactRight);
+
+	UFUNCTION(BlueprintCallable, Category = "Events")
+	virtual void OnDeath();
 
 protected:
 
@@ -92,14 +138,29 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Team")
 	FGameplayTagContainer TeamTags;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
-	bool IsRolling;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Montages")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
 	UAnimMontage* DeathAnim;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
+	UAnimMontage* HitReactLeftMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
+	UAnimMontage* HitReactRightMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
+	UAnimMontage* KnockbackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool CanMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	bool IsRolling;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	bool IsInterruptible;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
+	AActor* TargetActor = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

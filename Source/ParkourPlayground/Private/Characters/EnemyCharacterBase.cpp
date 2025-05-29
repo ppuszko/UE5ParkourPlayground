@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+
 #include "AI/Controllers/AIControllerBase.h"
 
 AEnemyCharacterBase::AEnemyCharacterBase() : ACharacterBase()
@@ -50,18 +51,27 @@ void AEnemyCharacterBase::BeginPlay()
 		HealthWidgetComponent->SetVisibility(ShouldDisplayHUD);
 	}
 
-	if (Stats)
-	{
-		Stats->OnDeath.AddDynamic(this, &AEnemyCharacterBase::OnDeath);
-		Stats->OnHealthChanged.AddDynamic(this, &AEnemyCharacterBase::OnHealthChanged);
-	}
-
-
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 	if (MoveComp)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Movement Mode: %d"), (int32)MoveComp->MovementMode);
 	}
+
+	if (Stats) Stats->OnHealthChanged.AddDynamic(this, &AEnemyCharacterBase::OnHealthChanged);
+
+}
+
+FVector AEnemyCharacterBase::GetAndUpdatePatrolLocation()
+{
+	if (PatrolRoute)
+	{
+		FVector Location = PatrolRoute->GetCurrentPatrolDestination();
+		PatrolRoute->IncrementPatrolIndex();
+
+		return Location;
+	}
+	
+	return GetActorLocation();
 }
 
 void AEnemyCharacterBase::ManageHUDDisplay(bool ShouldDisplay)
@@ -73,25 +83,28 @@ void AEnemyCharacterBase::ManageHUDDisplay(bool ShouldDisplay)
 
 void AEnemyCharacterBase::OnDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnDeathTriggered"));
+	Super::OnDeath();
 	if (AAIController* AIC = Cast<AAIController>(GetController()))
 	{
 		AIC->UnPossess();
 	}
-	if (DeathAnim)
+	if (Widget)
 	{
-		PlayAnimMontage(DeathAnim);
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		HealthWidgetComponent->SetVisibility(false);
 	}
+}
+
+void AEnemyCharacterBase::OnAttackFinished()
+{
+	Super::OnAttackFinished();
+
+	if (!AttackComponent->GetIsAttacking()) TargetActor = nullptr;
 }
 
 void AEnemyCharacterBase::OnHealthChanged()
 {
 	if (Widget)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnHealthChangedTriggered"));
 		Widget->SetHealth(Stats->GetHealthPercent());
 	}
 }

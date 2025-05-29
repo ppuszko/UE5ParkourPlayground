@@ -17,9 +17,14 @@ void UANSAttackWindow::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequen
 
 void UANSAttackWindow::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	if (CharacterRef && UAnimNotifyLibrary::NotifyStateReachedEnd(EventReference))
+	if (CharacterRef)
 	{
+		if (UAnimNotifyLibrary::NotifyStateReachedEnd(EventReference))
+		{
+			CharacterRef->GetAttackComponent()->ResetAttackState();
+		}
 		CharacterRef->GetAttackComponent()->OnAttackFinished.Broadcast();
-		CharacterRef->GetAttackComponent()->ResetAttackState();
 	}
+	
+	
 }

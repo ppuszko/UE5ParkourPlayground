@@ -14,6 +14,7 @@ public class ParkourPlayground : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
+            "PhysicsCore",
             "EnhancedInput",
             "GameplayTags",
             "MotionWarping",

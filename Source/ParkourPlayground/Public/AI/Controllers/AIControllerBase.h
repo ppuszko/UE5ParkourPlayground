@@ -31,8 +31,6 @@ protected:
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	UBehaviorTree* BehaviorTree;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;
@@ -48,6 +46,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI|Keys")
 	FName TargetActorKey;
+
+	UPROPERTY(EditAnywhere, Category = "AI|Keys")
+	FName AttackCountKey = "AttackCount";
 
 	float TimeElapsed = 0.f;
 

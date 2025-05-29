@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Characters/CharacterBase.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "GameplayTagAssetInterface.h"
 #include "Interfaces/Damageable.h"
 
@@ -14,12 +15,10 @@ void AWeaponBase::ToggleActive()
 	if (IsActive)
 	{
 		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//CapsuleComponent->SetHiddenInGame(true);
 	}
 	else
 	{
 		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		//CapsuleComponent->SetHiddenInGame(false);
 	}
 	IsActive = !IsActive;
 }
@@ -37,8 +36,7 @@ AWeaponBase::AWeaponBase()
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("WeaponCollider");
 	CapsuleComponent->InitCapsuleSize(0.f, 0.f);
 	CapsuleComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
-	//CapsuleComponent->SetCollisionProfileName(TEXT("Trigger"));
+	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	CapsuleComponent->SetupAttachment(RootComponent);
 
 	IsActive = false;
@@ -48,7 +46,7 @@ AWeaponBase::AWeaponBase()
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::HandleOverlapBegin);
 
@@ -59,16 +57,18 @@ void AWeaponBase::HandleOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	AActor* WeaponOwner = Cast<AActor>(OverlappedComp->GetOwner()->GetOwner());
 	if (WeaponOwner && WeaponOwner != OtherActor)
 	{
-		if (HitActors.Contains(OtherActor)) { return; }
-		else
+		IDamageable* ActorToHit = Cast<IDamageable>(OtherActor);
+		if (ActorToHit && ActorToHit->ShouldResolveAttackCollision(WeaponOwner))
 		{
-			if (CanBeAttacked(OtherActor, WeaponOwner))
+			if (HitActors.Contains(OtherActor)) 
+			{ 
+				return; 
+			}
+			else
 			{
+				FVector HitDirection;
 				HitActors.Add(OtherActor);
-				if (IDamageable* ActorToHit = Cast<IDamageable>(OtherActor))
-				{
-					ActorToHit->TakeDamage(WeaponOwner);
-				}
+				ActorToHit->TakeDamage(WeaponOwner, ActorToHit->CalculateHitDirection(GetActorLocation(), HitDirection));
 			}
 		}
 	}

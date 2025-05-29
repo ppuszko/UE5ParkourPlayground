@@ -6,6 +6,8 @@
 #include "Characters/CharacterBase.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AI/Navigation/PatrolRoute.h"
+#include "BehaviorTree/BehaviorTree.h"
 
 #include "EnemyCharacterBase.generated.h"
 
@@ -23,7 +25,6 @@ class PARKOURPLAYGROUND_API AEnemyCharacterBase : public ACharacterBase
 
 public:
 
-	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool GetIsAttacking() const { return AttackComponent != nullptr ? AttackComponent->GetIsAttacking() : false; }
@@ -34,17 +35,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SwitchToWalk() { GetCharacterMovement()->MaxWalkSpeed = DefaultWalkSpeed; }
 
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	UBehaviorTree* GetBehaviorTree() { return BehaviorTree; }
+
+	UFUNCTION(BlueprintCallable, Category = "Navigation")
+	FVector GetAndUpdatePatrolLocation();
+
 	void ManageHUDDisplay(bool ShouldDisplay);
 
 protected:
-	UFUNCTION()
-	void OnDeath();
-
-	UFUNCTION()
-	void OnHealthChanged();
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="HUD")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
 	UWidgetComponent* HealthWidgetComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HUD")
@@ -62,7 +62,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float RunningWalkSpeed;
 
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Movement")
+	APatrolRoute* PatrolRoute;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UBehaviorTree* BehaviorTree;
+
+protected:
+	UFUNCTION()
+	void OnHealthChanged();
+
+	virtual void OnDeath() override;
+
+	virtual void OnAttackFinished() override;
 
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void BeginPlay() override;
+
+
+
+	
 
 };

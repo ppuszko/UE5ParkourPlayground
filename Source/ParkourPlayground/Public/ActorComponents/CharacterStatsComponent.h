@@ -11,7 +11,7 @@
 //
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDamaged, EDamageResponse, DamageResponse, AActor*, Instigator);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDamaged, EDamageResponse, DamageResponse, AActor*, Instigator, bool, HitReactRight);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlocked);
 
 
@@ -24,7 +24,7 @@ public:
 	// Sets default values for this component's properties
 	UCharacterStatsComponent();
 
-	bool TakeDamage(FSDamageInfo DamageInfo, AActor* Causer);
+	bool TakeDamage(FSDamageInfo DamageInfo, AActor* Causer, bool HitReactRight);
 	
 	//Event dispatchers
 	UPROPERTY(BlueprintAssignable, Category="Events")

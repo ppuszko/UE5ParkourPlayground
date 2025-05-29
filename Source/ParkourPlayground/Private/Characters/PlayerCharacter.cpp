@@ -19,7 +19,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Characters/EnemyCharacterBase.h"
 #include "MotionWarpingComponent.h"
-
+#include "Kismet/GameplayStatics.h"
 
 
 APlayerCharacter::APlayerCharacter() : ACharacterBase()
@@ -53,7 +53,6 @@ APlayerCharacter::APlayerCharacter() : ACharacterBase()
 
 	MotionWarping = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarping"));
 
-
 	EnemyDetectionRadius = CreateDefaultSubobject<USphereComponent>(TEXT("EnemyDetectionRadius"));
 	EnemyDetectionRadius->SetSphereRadius(2000.f);
 	EnemyDetectionRadius->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -62,9 +61,10 @@ APlayerCharacter::APlayerCharacter() : ACharacterBase()
 	EnemyDetectionRadius->SetGenerateOverlapEvents(true);
 	EnemyDetectionRadius->SetupAttachment(RootComponent);
 
-
 	SprintMoveSpeed = 800.f;
 	WalkMoveSpeed = GetMovementComponent()->GetMaxSpeed();
+	HighFallVelocityThreshold = -1000.f;
+
 	CanMove = true;
 	IsRolling = false;
 	IsTargetLocked = false;
@@ -74,12 +74,9 @@ APlayerCharacter::APlayerCharacter() : ACharacterBase()
 
 	MaxStamina = 150.f;
 	CurrentStamina = MaxStamina;
-
 	StaminaDrainRate = 3.f;
 	StaminaRegenRate = 6.f;
 	StaminaAttackCost = 12.f;
-
-	//SetActorTickInterval(.03f);
 }
 
 void APlayerCharacter::ToggleInvincibility(bool Invincible)
@@ -123,17 +120,13 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 
-	if (AttackComponent)
-	{
-		AttackComponent->OnAttackFinished.AddUniqueDynamic(this, &APlayerCharacter::OnAttackFinished);
-		AttackComponent->OnAttackStarted.AddUniqueDynamic(this, &APlayerCharacter::OnAttackStarted);
-	}
-
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
-		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnVaultEnded);
-		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnRollEnded);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnVaultFinished);
+		AnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnRollFinished);
 	}
+
+	if (Stats) Stats->OnHealthChanged.AddDynamic(this, &APlayerCharacter::OnHealthChanged);
 }
 
 void APlayerCharacter::NotifyControllerChanged()
@@ -183,16 +176,19 @@ void APlayerCharacter::Tick(float DeltaTime)
 			{
 				FVector LookAtStart = CameraBoom->GetComponentLocation();
 				LookAtStart -= GetActorForwardVector() * 200.f;
+				LookAtStart.Z += 200.f;
+
 				FVector LookAtEnd = FocusedObject->GetActorLocation();
 				FRotator NewRot = UKismetMathLibrary::FindLookAtRotation(LookAtStart, LookAtEnd);
 
 				FRotator SmoothedRot = FMath::RInterpTo(GetControlRotation(), NewRot, DeltaTime, 14.f);
-
 				Controller->SetControlRotation(SmoothedRot);
 			}
 			else
 			{
 				FVector BoomLoc = CameraBoom->GetComponentLocation();
+				BoomLoc.Z += 200.f;
+
 				FVector TargetLoc = FocusedObject->GetActorLocation();
 				FRotator DesiredWorldRot = (TargetLoc - BoomLoc).Rotation();
 				CameraBoom->SetWorldRotation(DesiredWorldRot);
@@ -206,6 +202,21 @@ void APlayerCharacter::Tick(float DeltaTime)
 			IsTargetLocked = false;
 		}
 	}
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (LandingCameraShake && HardLandingCameraShake)
+	{
+		if(GetCharacterMovement()->Velocity.Z >= HighFallVelocityThreshold)
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), LandingCameraShake, GetActorLocation(), 400.f, 2000.f);
+		else
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), HardLandingCameraShake, GetActorLocation(), 400.f, 2000.f);
+	}
+	
+
 }
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
@@ -265,9 +276,10 @@ void APlayerCharacter::Sprint(const FInputActionValue& Value)
 void APlayerCharacter::Roll(const FInputActionValue& Value)
 {
 
-	if (!IsRolling)
+	if (!IsRolling && CanMove)
 	{
 		IsRolling = true;
+		AttackComponent->ResetAttackState();
 		if (IsTargetLocked)
 		{
 			UCharacterMovementComponent* CharMovement = GetCharacterMovement();
@@ -294,11 +306,7 @@ void APlayerCharacter::Roll(const FInputActionValue& Value)
 			GetMesh()->GetAnimInstance()->Montage_Play(RollMontage);
 			
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Roll pressed"));
 	}
-
-
 }
 
 void APlayerCharacter::JumpStart(const FInputActionValue& Value)
@@ -342,8 +350,6 @@ void APlayerCharacter::TargetLock(const FInputActionValue& Value)
 {
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 
-	UE_LOG(LogTemp, Warning, TEXT("Entered target lock action"));
-
 	if (IsTargetLocked)
 	{
 		MoveComp->bOrientRotationToMovement = true;
@@ -362,6 +368,7 @@ void APlayerCharacter::TargetLock(const FInputActionValue& Value)
 
 			auto LookAtStart = GetActorLocation();
 			LookAtStart -= GetActorForwardVector() * 200.f;
+			LookAtStart.Z += 200.f;
 
 			GetController()->SetControlRotation(UKismetMathLibrary::FindLookAtRotation(
 				LookAtStart, FocusedObject->GetActorLocation()));
@@ -395,10 +402,10 @@ void APlayerCharacter::DrainStamina()
 {
 	CurrentStamina -= 0.1f * StaminaDrainRate;
 
-	if (CurrentStamina <= 0.f)
+	if (CurrentStamina <= 0.f || UKismetMathLibrary::VSizeXY(GetVelocity()) <= 1.f)
 	{
-		CurrentStamina = 0.f;
-		GetWorld()->GetTimerManager().ClearTimer(StaminaTimer);
+		//CurrentStamina = 0.f;
+		InitStaminaRegen();
 		IsSprinting = false;
 		GetCharacterMovement()->MaxWalkSpeed = WalkMoveSpeed;
 	}
@@ -435,14 +442,18 @@ void APlayerCharacter::UpdateStamina()
 
 void APlayerCharacter::OnAttackStarted()
 {
-	CanMove = false;
+	Super::OnAttackStarted();
 	CurrentStamina -= StaminaAttackCost;
-	UpdateStamina();
+	if (GetAttackComponent()->GetIsAttacking())
+	{
+		UpdateStamina();
+	}
 }
 
 void APlayerCharacter::OnAttackFinished()
 {
-	InitStaminaRegen();
+	Super::OnAttackFinished();
+	if(!AttackComponent->GetIsAttacking()) InitStaminaRegen();
 }
 
 void APlayerCharacter::OnDetectionRadiusBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -467,13 +478,14 @@ void APlayerCharacter::OnDetectionRadiusEndOverlap(UPrimitiveComponent* Overlapp
 		{
 			UpdateOverlayMatOnActor(FocusedObject, false);
 			FocusedObject = nullptr;
+			TargetActor = nullptr;
 		}
 		EnemiesInRange.Remove(Enemy);
 		Enemy->ManageHUDDisplay(false);
 	}
 }
 
-void APlayerCharacter::OnVaultEnded(UAnimMontage* Montage, bool bIsInterrupted)
+void APlayerCharacter::OnVaultFinished(UAnimMontage* Montage, bool bIsInterrupted)
 {
 	if (VaultMontages.Contains(VaultType) && Montage == VaultMontages[VaultType])
 	{
@@ -481,13 +493,24 @@ void APlayerCharacter::OnVaultEnded(UAnimMontage* Montage, bool bIsInterrupted)
 	}
 }
 
-void APlayerCharacter::OnRollEnded(UAnimMontage* Montage, bool bIsInterrupted)
+void APlayerCharacter::OnRollFinished(UAnimMontage* Montage, bool bIsInterrupted)
 {
 	if (Montage == RollMontage)
 	{
 		UKismetSystemLibrary::Delay(GetWorld(), 1.5f, FLatentActionInfo());
 		CameraBoom->SetUsingAbsoluteRotation(false);
 		CameraBoom->bUsePawnControlRotation = true;
+		CanMove = true;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		SetIsRolling(false);
+	}
+}
+
+void APlayerCharacter::OnHealthChanged()
+{
+	if (Widget)
+	{
+		Widget->SetHealth(Stats->GetHealthPercent());
 	}
 }
 
@@ -510,6 +533,7 @@ void APlayerCharacter::CalculateFocusCandidate()
 				{
 					UpdateOverlayMatOnActor(FocusedObject, false);
 					FocusedObject = Enemy;
+					TargetActor = Enemy;
 					UpdateOverlayMatOnActor(FocusedObject, true);
 					CurrentClosestAngle = Dot;
 				}
@@ -549,13 +573,8 @@ bool APlayerCharacter::IsNearObstacle()
 		FoundHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, TraceChannel, QueryParams);
 		if (FoundHit)
 		{
-			//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, HitResult.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 3.0f);
 			VaultStart = HitResult.ImpactPoint;
 			break;
-		}
-		else
-		{
-			//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, HitResult.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 3.0f);
 		}
 	}
 
@@ -568,7 +587,7 @@ bool APlayerCharacter::IsNearObstacle()
 
 		if (FoundHit)
 		{
-			if (HitResult.ImpactPoint.Z - GetActorLocation().Z >= 250.f)
+			if (HitResult.ImpactPoint.Z - GetActorLocation().Z >= 350.f)
 			{
 				return false;
 			}
@@ -585,7 +604,6 @@ bool APlayerCharacter::IsNearObstacle()
 
 				if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, TraceChannel, QueryParams))
 				{
-					//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, HitResult.bBlockingHit ? FColor::Blue : FColor::Red, false, 5.0f, 0, 10.0f);
 					VaultEnd = HitResult.ImpactPoint;
 					if (static_cast<uint8>(VaultType) >= 2)
 					{

@@ -7,6 +7,7 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Characters/EnemyCharacterBase.h"
 
 AAIControllerBase::AAIControllerBase()
 {
@@ -85,14 +86,20 @@ void AAIControllerBase::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	FTimerHandle InitHandle;
+	AEnemyCharacterBase* ControlledPawn = Cast<AEnemyCharacterBase>(InPawn);
+	
 
-	GetWorld()->GetTimerManager().SetTimer(InitHandle,
-		[this](){
-		UE_LOG(LogTemp, Warning, TEXT("Running BT after delay"));
-		RunBehaviorTree(BehaviorTree);
-		BrainComponent->RestartLogic(); },
-		.2f,
-		false);
+	if (ControlledPawn)
+	{
+		//UAttackComponent* AttackComp = ControlledPawn->GetAttackComponent();
+		RunBehaviorTree(ControlledPawn->GetBehaviorTree());
 
+		//if (AttackComp)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("Set attack count: %d"), AttackComp->GetAttackCount())
+		//	GetBlackboardComponent()->SetValueAsInt(AttackCountKey, AttackComp->GetAttackCount());
+		//}
+	}
+
+	
 }

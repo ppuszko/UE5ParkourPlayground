@@ -21,5 +21,6 @@ void UANSRoll::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* An
 		Player->ToggleInvincibility(false);
 		Player->GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		Player->SetIsRolling(false);
+		Player->SetCanRoll(true);
 	}
 }

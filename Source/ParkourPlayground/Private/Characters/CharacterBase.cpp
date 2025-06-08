@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Engine/World.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -208,6 +209,7 @@ void ACharacterBase::PostInitializeComponents()
 void ACharacterBase::OnAttackStarted()
 {
 	CanMove = false;
+	CanRoll = false;
 }
 
 void ACharacterBase::OnAttackFinished()
@@ -219,6 +221,11 @@ void ACharacterBase::OnDamaged(EDamageResponse DamageResponse, AActor* Causer, b
 {
 	if (IsInterruptible)
 	{
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+		}
+
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (DamageResponse == EDamageResponse::Default)
 		{
@@ -254,6 +261,10 @@ void ACharacterBase::OnDamaged(EDamageResponse DamageResponse, AActor* Causer, b
 
 void ACharacterBase::OnDeath()
 {
+	if (DeathSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
+	}
 	if (DeathAnim)
 	{
 		PlayAnimMontage(DeathAnim);

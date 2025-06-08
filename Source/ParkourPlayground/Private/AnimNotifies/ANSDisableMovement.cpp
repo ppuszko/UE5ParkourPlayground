@@ -9,8 +9,7 @@ void UANSDisableMovement::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 	if (CharacterRef)
 	{
-		CharacterRef->SetCanMove(false);
-		
+		CharacterRef->SetCanMove(false);	
 	}
 }
 
@@ -19,6 +18,7 @@ void UANSDisableMovement::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 	if (CharacterRef)
 	{
 		CharacterRef->SetCanMove(true);
+		CharacterRef->SetCanRoll(true);
 		CharacterRef->GetAttackComponent()->ResetAttackState();
 	}
 }

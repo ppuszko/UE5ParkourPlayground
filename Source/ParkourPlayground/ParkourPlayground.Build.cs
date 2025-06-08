@@ -20,7 +20,7 @@ public class ParkourPlayground : ModuleRules
             "MotionWarping",
             "AnimationModifiers",
             "NavigationSystem",
-            "AIModule"
+            "AIModule",
             });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -71,6 +71,7 @@ APlayerCharacter::APlayerCharacter() : ACharacterBase()
 	bUseControllerRotationYaw = false;
 	HasVaulted = false;
 	IsVaulting = false;
+	CanRoll = true;
 
 	MaxStamina = 150.f;
 	CurrentStamina = MaxStamina;
@@ -170,7 +171,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (IsTargetLocked)
 	{
-		if (FocusedObject)
+		if (FocusedObject && !GetIsDead())
 		{
 			if (!IsRolling)
 			{
@@ -251,6 +252,7 @@ void APlayerCharacter::LightAttack(const FInputActionValue& Value)
 {
 	if (CurrentStamina >= StaminaAttackCost)
 	{
+		CanRoll = true;
 		IsSprinting = false;
 		AttackComponent->Attack();
 	}
@@ -276,9 +278,10 @@ void APlayerCharacter::Sprint(const FInputActionValue& Value)
 void APlayerCharacter::Roll(const FInputActionValue& Value)
 {
 
-	if (!IsRolling && CanMove)
+	if (!IsRolling && CanRoll)
 	{
 		IsRolling = true;
+		CanRoll = false;
 		AttackComponent->ResetAttackState();
 		if (IsTargetLocked)
 		{
@@ -456,17 +459,28 @@ void APlayerCharacter::OnAttackFinished()
 	if(!AttackComponent->GetIsAttacking()) InitStaminaRegen();
 }
 
+void APlayerCharacter::OnDeath()
+{
+	Super::OnDeath();
+	if (APlayerController* Con = Cast<APlayerController>(GetController())) DisableInput(Con);
+}
+
 void APlayerCharacter::OnDetectionRadiusBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (AEnemyCharacterBase* Enemy = Cast<AEnemyCharacterBase>(OtherActor))
 	{
-		IGameplayTagAssetInterface* EnemyTags = Cast<IGameplayTagAssetInterface>(Enemy);
+		//IGameplayTagAssetInterface* EnemyTags = Cast<IGameplayTagAssetInterface>(Enemy);
 
-		if (EnemyTags && !EnemyTags->HasMatchingGameplayTag(TeamTags.First()) && !EnemiesInRange.Contains(Enemy))
+		if(GetTeamAttitudeTowards(*Enemy) == ETeamAttitude::Hostile)
 		{
 			EnemiesInRange.Add(Enemy);
 			Enemy->ManageHUDDisplay(true);
 		}
+
+		//if (EnemyTags && !EnemyTags->HasMatchingGameplayTag(TeamTags.First()) && !EnemiesInRange.Contains(Enemy))
+		//{
+		//	
+		//}
 	}
 }
 

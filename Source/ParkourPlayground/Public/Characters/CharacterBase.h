@@ -12,11 +12,12 @@
 #include "Weapons/WeaponBase.h"
 #include "GenericTeamAgentInterface.h"
 
+
 #include "CharacterBase.generated.h"
 
 
 UCLASS()
-class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IGameplayTagAssetInterface, public IDamageable, public IGenericTeamAgentInterface
+class PARKOURPLAYGROUND_API ACharacterBase : public ACharacter, public IDamageable, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -37,12 +38,23 @@ public:
 
 	// Finish IDamageable interface //
 
+	// Start Getters & Setters //
+
+	// Setters
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void SetIsInterruptible(bool bIsInterruptible) { IsInterruptible = bIsInterruptible; }
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void SetCanMove(bool bCanMove) { CanMove = bCanMove; }
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void SetCanRoll(bool bCanRoll) { CanRoll = bCanRoll; }
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	virtual void SetTargetActor(AActor* InTargetActor) { TargetActor = InTargetActor; }
+
+
+	// Getters
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool GetCanMove() const { return CanMove; }
 
@@ -52,8 +64,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	bool GetIsDead() const { return Stats != nullptr ? Stats->GetIsDead() : false; }
 
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	virtual void SetTargetActor(AActor* InTargetActor) { TargetActor = InTargetActor; }
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	UAttackComponent* GetAttackComponent() { return AttackComponent; }
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	virtual const AActor* GetTargetActor() const { return TargetActor; }
@@ -61,21 +73,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	AWeaponBase* GetWeapon() const { return Weapon; }
 
+	// Finish Getters & Setters //
+	
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void StartPiercingDash();
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void EndPiercingDash();
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	UAttackComponent* GetAttackComponent() { return AttackComponent; }
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	virtual void GetOwnedGameplayTags(FGameplayTagContainer& OutTags) const override { OutTags = TeamTags; }
-
-	
-
-public:
 
 	void SwapWeapons();
 
@@ -135,9 +139,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Weapon")
 	FName WeaponSocketName;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Team")
-	FGameplayTagContainer TeamTags;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
 	UAnimMontage* DeathAnim;
 
@@ -150,6 +151,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montages")
 	UAnimMontage* KnockbackMontage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundBase* HitSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	USoundBase* DeathSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool CanMove;
 
@@ -159,8 +166,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
 	bool IsInterruptible;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement")
+	bool CanRoll;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
 	AActor* TargetActor = nullptr;
+
+	
 
 protected:
 	// Called when the game starts or when spawned

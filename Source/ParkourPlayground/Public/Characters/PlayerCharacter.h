@@ -210,6 +210,7 @@ protected:
 
 	virtual void OnAttackFinished() override;
 
+	virtual void OnDeath() override;
 
 protected:
 

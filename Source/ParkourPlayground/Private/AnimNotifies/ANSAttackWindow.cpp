@@ -12,6 +12,7 @@ void UANSAttackWindow::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequen
 	if(CharacterRef)
 	{
 		CharacterRef->GetAttackComponent()->AllowComboContinuation();
+		CharacterRef->SetCanRoll(true);
 	}
 }
 
